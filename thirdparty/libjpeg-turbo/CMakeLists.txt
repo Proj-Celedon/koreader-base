@@ -1,4 +1,4 @@
-list(APPEND PATCH_FILES no_cmake_rpath_shenanigans.patch)
+list(APPEND PATCH_FILES no_cmake_rpath_shenanigans.patch fix_bits.patch)
 
 list(APPEND CMAKE_ARGS
     -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}
