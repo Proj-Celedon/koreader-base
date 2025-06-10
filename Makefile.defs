@@ -1000,6 +1000,7 @@ LDFLAGS = ['-L$(abspath $(STAGING_DIR)/lib)']
 
 [binaries]
 c = [CCACHE, '$(strip $(REALCC))']
+objc = [CCACHE, '$(strip $(REALCC))']
 # c_ld
 cpp = [CCACHE, '$(strip $(REALCXX))']
 # cpp_ld
