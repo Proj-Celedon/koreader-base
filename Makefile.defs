@@ -1029,7 +1029,7 @@ else
 MESON_CROSS_TOOLCHAIN = $(CMAKE_DIR)/meson_cross_toolchain.ini
 MESON_HOST_TOOLCHAIN = $(CMAKE_DIR)/meson_host_toolchain.ini
 
-MESON_CROSS_SYSTEM = $(if $(ANDROID),android,linux)
+MESON_CROSS_SYSTEM = $(if $(ANDROID),android,$(if $(DARWIN),darwin,linux))
 ifneq (,$(filter aarch64-%,$(CHOST)))
   MESON_CROSS_CPU_FAMILY = aarch64
 else ifneq (,$(filter arm-% armv7a-%,$(CHOST)))
