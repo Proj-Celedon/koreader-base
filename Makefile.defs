@@ -255,6 +255,11 @@ else ifeq ($(TARGET), cervantes)
 		CHOST?=arm-linux-gnueabi
 	endif
 	USE_LJ_WPACLIENT=1
+else ifeq ($(TARGET), ios)
+	IOS_PLATFORM=1
+	DARWIN=1
+	CHOST?=arm-apple-darwin9
+	SDL=1
 else ifndef TARGET
 	# if TARGET is not defined we will build an emulator on current machine
 	EMULATE_READER=1
@@ -593,6 +598,9 @@ else ifeq ($(TARGET), linux)
 	else ifeq ($(LINUX_ARCH), arm64)
 		ARM_ARCH:=$(ARM64_GENERIC_ARCH)
 	endif
+else ifeq ($(TARGET), ios)
+	ARM_ARCH:=$(ARMV6_1136_ARCH)
+	ARM_ARCH+=-mfloat-abi=softfp
 else
 	# else, we are compiling emulator on x86
 	ARM_ARCH:=
@@ -966,6 +974,7 @@ set(MACOS          $(MACOS))
 set(POCKETBOOK     $(POCKETBOOK))
 set(REMARKABLE     $(REMARKABLE))
 set(SONY_PRSTUX    $(SONY_PRSTUX))
+set(IOS_PLATFORM   $(IOS_PLATFORM))
 
 set(SKIP_LUAJIT_BIN $(SKIP_LUAJIT_BIN))
 set(USE_LUAJIT_LIB  $(USE_LUAJIT_LIB))
