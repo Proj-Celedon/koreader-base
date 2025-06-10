@@ -1,0 +1,195 @@
+From 6d149779ebb830e1cd2a4b2494438be07dd310df Mon Sep 17 00:00:00 2001
+From: Stella Diaz <electi@yzu.moe>
+Date: Tue, 10 Jun 2025 17:28:00 -0400
+Subject: [PATCH] ermmmm
+
+Signed-off-by: Stella Diaz <electi@yzu.moe>
+
+ermmmm
+---
+ src/Makefile           | 10 ++++++----
+ src/host/buildvm_asm.c | 12 ++----------
+ src/lib_table.c        |  4 ----
+ src/lj_arch.h          |  6 +-----
+ src/lj_prng.c          |  2 +-
+ src/vm_arm.dasc        |  3 +--
+ 6 files changed, 11 insertions(+), 26 deletions(-)
+
+diff --git a/src/Makefile b/src/Makefile
+index c83abfa0..402a0e35 100644
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -211,6 +211,7 @@ TARGET_STCC= $(STATIC_CC)
+ TARGET_DYNCC= $(DYNAMIC_CC)
+ TARGET_LD= $(CROSS)$(CC)
+ TARGET_AR= $(CROSS)ar rcus
++TARGET_RANLIB= $(CROSS)ranlib
+ TARGET_STRIP= $(CROSS)strip
+ 
+ TARGET_LIBPATH= $(or $(PREFIX),/usr/local)/$(or $(MULTILIB),lib)
+@@ -657,7 +658,7 @@ depend:
+ 
+ $(MINILUA_T): $(MINILUA_O)
+ 	$(E) "HOSTLINK  $@"
+-	$(Q)$(HOST_CC) $(HOST_ALDFLAGS) -o $@ $(MINILUA_O) $(MINILUA_LIBS) $(HOST_ALIBS)
++	$(Q)$(HOST_CC) $(HOST_ACFLAGS) $(HOST_ALDFLAGS) -o $@ $(MINILUA_O) $(MINILUA_LIBS) $(HOST_ALIBS)
+ 
+ luajit.h: $(MINILUA_DEP) $(GIT_DEP) luajit_rolling.h
+ 	$(E) "VERSION   $@"
+@@ -672,7 +673,7 @@ host/buildvm.o: $(DASM_DIR)/dasm_*.h
+ 
+ $(BUILDVM_T): $(BUILDVM_O)
+ 	$(E) "HOSTLINK  $@"
+-	$(Q)$(HOST_CC) $(HOST_ALDFLAGS) -o $@ $(BUILDVM_O) $(HOST_ALIBS)
++	$(Q)$(HOST_CC) $(HOST_ACFLAGS) $(HOST_ALDFLAGS) -o $@ $(BUILDVM_O) $(HOST_ALIBS)
+ 
+ $(LJVM_BOUT): $(BUILDVM_T)
+ 	$(E) "BUILDVM   $@"
+@@ -733,16 +734,17 @@ include Makefile.dep
+ $(LUAJIT_A): $(LJVMCORE_O)
+ 	$(E) "AR        $@"
+ 	$(Q)$(TARGET_AR) $@ $(LJVMCORE_O)
++	$(Q)$(TARGET_RANLIB) $@
+ 
+ # The dependency on _O, but linking with _DYNO is intentional.
+ $(LUAJIT_SO): $(LJVMCORE_O)
+ 	$(E) "DYNLINK   $@"
+-	$(Q)$(TARGET_LD) $(TARGET_ASHLDFLAGS) -o $@ $(LJVMCORE_DYNO) $(TARGET_ALIBS)
++	$(Q)$(TARGET_LD) $(TARGET_ACFLAGS) $(TARGET_ASHLDFLAGS) -o $@ $(LJVMCORE_DYNO) $(TARGET_ALIBS)
+ 	$(Q)$(TARGET_STRIP) $@
+ 
+ $(LUAJIT_T): $(TARGET_O) $(LUAJIT_O) $(TARGET_DEP)
+ 	$(E) "LINK      $@"
+-	$(Q)$(TARGET_LD) $(TARGET_ALDFLAGS) -o $@ $(LUAJIT_O) $(TARGET_O) $(TARGET_ALIBS)
++	$(Q)$(TARGET_LD) $(TARGET_ACFLAGS) $(TARGET_ALDFLAGS) -o $@ $(LUAJIT_O) $(TARGET_O) $(TARGET_ALIBS)
+ 	$(Q)$(TARGET_STRIP) $@
+ 	$(E) "OK        Successfully built LuaJIT"
+ 
+diff --git a/src/host/buildvm_asm.c b/src/host/buildvm_asm.c
+index 3870b8fe..c06bebe1 100644
+--- a/src/host/buildvm_asm.c
++++ b/src/host/buildvm_asm.c
+@@ -194,12 +194,8 @@ static void emit_asm_label(BuildCtx *ctx, const char *name, int size, int isfunc
+     }
+ #endif
+     fprintf(ctx->fp,
+-      "\n\t.globl %s\n"
+-      "\t.hidden %s\n"
+-      "\t.type %s, " ELFASM_PX "%s\n"
+-      "\t.size %s, %d\n"
+-      "%s:\n",
+-      name, name, name, isfunc ? "function" : "object", name, size, name);
++      "\n\t.globl %s\n",
++      name);
+     break;
+   case BUILD_coffasm:
+     fprintf(ctx->fp, "\n\t.globl %s\n", name);
+@@ -327,16 +323,12 @@ void emit_asm(BuildCtx *ctx)
+   fprintf(ctx->fp, "\n");
+   switch (ctx->mode) {
+   case BUILD_elfasm:
+-#if !(LJ_TARGET_PS3 || LJ_TARGET_PSVITA)
+-    fprintf(ctx->fp, "\t.section .note.GNU-stack,\"\"," ELFASM_PX "progbits\n");
+-#endif
+ #if LJ_TARGET_PPC && !LJ_TARGET_PS3 && !LJ_ABI_SOFTFP
+     /* Hard-float ABI. */
+     fprintf(ctx->fp, "\t.gnu_attribute 4, 1\n");
+ #endif
+     /* fallthrough */
+   case BUILD_coffasm:
+-    fprintf(ctx->fp, "\t.ident \"%s\"\n", ctx->dasm_ident);
+     break;
+   case BUILD_machasm:
+ #if defined(__apple_build_version__) && __apple_build_version__ >= 15000000 && __apple_build_version__ < 15000300
+diff --git a/src/lib_table.c b/src/lib_table.c
+index d159360b..a3f146ce 100644
+--- a/src/lib_table.c
++++ b/src/lib_table.c
+@@ -267,7 +267,6 @@ LJLIB_CF(table_sort)
+   return 0;
+ }
+ 
+-#if LJ_52
+ LJLIB_PUSH("n")
+ LJLIB_CF(table_pack)
+ {
+@@ -283,7 +282,6 @@ LJLIB_CF(table_pack)
+   lj_gc_check(L);
+   return 1;
+ }
+-#endif
+ 
+ LJLIB_NOREG LJLIB_CF(table_new)		LJLIB_REC(.)
+ {
+@@ -316,10 +314,8 @@ static int luaopen_table_clear(lua_State *L)
+ LUALIB_API int luaopen_table(lua_State *L)
+ {
+   LJ_LIB_REG(L, LUA_TABLIBNAME, table);
+-#if LJ_52
+   lua_getglobal(L, "unpack");
+   lua_setfield(L, -2, "unpack");
+-#endif
+   lj_lib_prereg(L, LUA_TABLIBNAME ".new", luaopen_table_new, tabV(L->top-1));
+   lj_lib_prereg(L, LUA_TABLIBNAME ".clear", luaopen_table_clear, tabV(L->top-1));
+   return 1;
+diff --git a/src/lj_arch.h b/src/lj_arch.h
+index a4eecf27..04660f56 100644
+--- a/src/lj_arch.h
++++ b/src/lj_arch.h
+@@ -124,11 +124,7 @@
+ #define LJ_TARGET_POSIX		(LUAJIT_OS > LUAJIT_OS_WINDOWS)
+ #define LJ_TARGET_DLOPEN	LJ_TARGET_POSIX
+ 
+-#if defined(TARGET_OS_IPHONE) && TARGET_OS_IPHONE
+ #define LJ_TARGET_IOS		1
+-#else
+-#define LJ_TARGET_IOS		0
+-#endif
+ 
+ #ifdef __CELLOS_LV2__
+ #define LJ_TARGET_PS3		1
+@@ -553,7 +549,7 @@
+ /* Runtime code generation is restricted on iOS. Complain to Apple, not me. */
+ /* Ditto for the consoles. Complain to Sony or MS, not me. */
+ #ifndef LUAJIT_ENABLE_JIT
+-#define LJ_OS_NOJIT		1
++//#define LJ_OS_NOJIT		1
+ #endif
+ #endif
+ 
+diff --git a/src/lj_prng.c b/src/lj_prng.c
+index 02146b27..701260c2 100644
+--- a/src/lj_prng.c
++++ b/src/lj_prng.c
+@@ -227,7 +227,7 @@ int LJ_FASTCALL lj_prng_seed_secure(PRNGState *rs)
+   ** or the OS ran out of file descriptors.
+   */
+   {
+-    int fd = open("/dev/urandom", O_RDONLY|O_CLOEXEC);
++    int fd = open("/dev/urandom", O_RDONLY);
+     if (fd != -1) {
+       ssize_t n = read(fd, rs->u, sizeof(rs->u));
+       (void)close(fd);
+diff --git a/src/vm_arm.dasc b/src/vm_arm.dasc
+index 86bef0cf..ae7a6282 100644
+--- a/src/vm_arm.dasc
++++ b/src/vm_arm.dasc
+@@ -4634,14 +4634,13 @@ static void emit_asm_debug(BuildCtx *ctx)
+   int i;
+   switch (ctx->mode) {
+   case BUILD_elfasm:
+-    fprintf(ctx->fp, "\t.section .debug_frame,\"\",%%progbits\n");
+     fprintf(ctx->fp,
+ 	".Lframe0:\n"
+ 	"\t.long .LECIE0-.LSCIE0\n"
+ 	".LSCIE0:\n"
+ 	"\t.long 0xffffffff\n"
+ 	"\t.byte 0x1\n"
+-	"\t.string \"\"\n"
++	"\t.asciz \"\"\n"
+ 	"\t.uleb128 0x1\n"
+ 	"\t.sleb128 -4\n"
+ 	"\t.byte 0xe\n"				/* Return address is in lr. */
+-- 
+2.43.0
+
