@@ -90,17 +90,6 @@ endfunction()
 
 # }}}.
 
-# Ensure `MACOSX_DEPLOYMENT_TARGET` is set, and `CMAKE_OSX_DEPLOYMENT_TARGET` matches.
-if(APPLE)
-    if(NOT DEFINED ENV{MACOSX_DEPLOYMENT_TARGET} OR "$ENV{MACOSX_DEPLOYMENT_TARGET}" STREQUAL "")
-        message(FATAL_ERROR "$MACOSX_DEPLOYMENT_TARGET is not set")
-    endif()
-    if(NOT "$ENV{MACOSX_DEPLOYMENT_TARGET}" STREQUAL CMAKE_OSX_DEPLOYMENT_TARGET)
-        message(FATAL_ERROR "$MACOSX_DEPLOYMENT_TARGET / CMAKE_OSX_DEPLOYMENT_TARGET discrepancy: \"$ENV{MACOSX_DEPLOYMENT_TARGET}\" != \"${CMAKE_OSX_DEPLOYMENT_TARGET}\"")
-    endif()
-    message(STATUS "OSX deployment target: ${CMAKE_OSX_DEPLOYMENT_TARGET}")
-endif()
-
 # Git. {{{
 
 find_package(Git REQUIRED)
@@ -256,16 +245,6 @@ declare_project(thirdparty/fribidi EXCLUDE_FROM_ALL)
 # giflib
 declare_project(thirdparty/giflib)
 
-# glib
-set(DEPENDS)
-if(NOT HAS_GETTEXT)
-    list(APPEND DEPENDS proxy-libintl)
-endif()
-if(NOT HAS_ICONV)
-    list(APPEND DEPENDS libiconv)
-endif()
-declare_project(thirdparty/glib DEPENDS ${DEPENDS} EXCLUDE_FROM_ALL)
-
 # harfbuzz
 declare_project(thirdparty/harfbuzz DEPENDS freetype2)
 
@@ -391,12 +370,6 @@ declare_project(thirdparty/openssh ${EXCLUDE_FROM_ALL})
 
 # popen-noshell
 declare_project(thirdparty/popen-noshell EXCLUDE_FROM_ALL)
-
-# proxy-libintl
-declare_project(thirdparty/proxy-libintl EXCLUDE_FROM_ALL)
-
-# sdcv
-declare_project(thirdparty/sdcv DEPENDS glib zlib)
 
 # sdl2
 if(APPIMAGE OR MACOS)

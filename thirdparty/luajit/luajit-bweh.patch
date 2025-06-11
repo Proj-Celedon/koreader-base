@@ -158,6 +158,19 @@ index a4eecf27..04660f56 100644
  #endif
  
 diff --git a/src/lj_prng.c b/src/lj_prng.c
+index 02146b2..701260c 100644
+--- a/src/lj_prng.c
++++ b/src/lj_prng.c
+@@ -227,7 +227,7 @@ int LJ_FASTCALL lj_prng_seed_secure(PRNGState *rs)
+   ** or the OS ran out of file descriptors.
+   */
+   {
+-    int fd = open("/dev/urandom", O_RDONLY|O_CLOEXEC);
++    int fd = open("/dev/urandom", O_RDONLY);
+     if (fd != -1) {
+       ssize_t n = read(fd, rs->u, sizeof(rs->u));
+       (void)close(fd);
+diff --git a/src/lj_prng.c b/src/lj_prng.c
 index 02146b27..701260c2 100644
 --- a/src/lj_prng.c
 +++ b/src/lj_prng.c
