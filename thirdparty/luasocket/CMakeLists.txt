@@ -8,10 +8,6 @@ list(APPEND PATCH_FILES
     # To avoid duplicated code in luasec.
     export-api-for-luasec.patch
 )
-if(NOT ANDROID)
-    # Make sure socket fds are CLOEXEC on *nix.
-    list(APPEND PATCH_FILES enforce-cloexec.patch)
-endif()
 
 list(APPEND CMAKE_ARGS
     -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}
