@@ -17,8 +17,8 @@ else()
 endif()
 
 external_project(
-    DOWNLOAD GIT e84973356255bde06a70ce6263a3a0ef5c8f4ad4
-    https://github.com/NiLuJe/lua-rapidjson
+    DOWNLOAD GIT 815c60bda6fcb773d334d0d32fda479cc53416a7
+    https://github.com/electimon/lua-rapidjson
     PATCH_FILES ${PATCH_FILES}
     CMAKE_ARGS ${CMAKE_ARGS}
     BUILD_COMMAND ${BUILD_CMD}
