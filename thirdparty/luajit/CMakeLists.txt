@@ -1,14 +1,6 @@
 # Build in source tree.
 set(BINARY_DIR ${SOURCE_DIR})
 
-list(APPEND PATCH_FILES koreader-luajit-makefile-tweaks.patch)
-# Enable table.pack & table.unpack w/o the rest of the -DLUAJIT_ENABLE_LUA52COMPAT baggage...
-list(APPEND PATCH_FILES koreader-luajit-enable-table_pack.patch)
-if(ANDROID)
-    list(APPEND PATCH_FILES koreader-luajit-mcode-reserve-hack.patch)
-    # list(APPEND PATCH_FILES koreader-luajit-mcode-debug.patch)
-endif()
-
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     # Debugging is a go!
     list(APPEND PATCH_CMD COMMAND ${ISED} "s|#CCDEBUG= -g|CCDEBUG= -g|" src/Makefile)
@@ -103,7 +95,6 @@ append_tree_install_commands(INSTALL_CMD src/jit jit)
 external_project(
     DOWNLOAD GIT 25c318a47b408d2d0df6432142f2cae79e3692f4
     https://github.com/electimon/luajit
-    PATCH_FILES ${PATCH_FILES}
     PATCH_COMMAND ${PATCH_CMD}
     BUILD_COMMAND ${BUILD_CMD}
     INSTALL_COMMAND ${INSTALL_CMD}
